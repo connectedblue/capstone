@@ -2,4 +2,4 @@ Here you'll store your raw data files. If they are encoded in a supported file f
 
 Raw coursera data is Coursera-SwiftKey.zip, downloaded from project site.
 
-Each raw variable is defined and loaded in a seperate R file with the name of the variable the same as the file name (so that it is auto cached when load.project() is run)
+Each lanhguage corpus is loaded seperately into a variable defined into an R file of the same name.  These are cached after loading before passing to munge
