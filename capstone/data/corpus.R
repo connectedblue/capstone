@@ -14,6 +14,7 @@ corpus_dir <- function(){
                                               config$testing_pcent)
                         writeLines(sample, file.path(config$testing_dir, doc))
                 }
+                corpus_dir
                 
         } else {
                 config$training_dir

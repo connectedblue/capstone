@@ -29,5 +29,14 @@ sample_file <- function(full_dataset, select_pcent) {
         output
 } 
 
+# Function to remove testing files from current testing set
+# if we want to force a re-generation next time load.project
+# is run (maybe because new training data is added or the
+# sample percent has changed).  
+#
+# This is to be run manually when needed
 
+reset_testing <- function () {
+        unlink(config$testing_dir, recursive = TRUE)
+}
 
