@@ -1,6 +1,4 @@
 
-#setOption("encoding","UTF-8")
-
 # Function to sample a text file dataset and read in a subset of lines
 # returns the subset
 # slect_pcent is the percentage of the overall file size to sample (won't be exact - this is fed into
@@ -30,5 +28,6 @@ sample_file <- function(full_dataset, select_pcent) {
         close(con)
         output
 } 
+
 
 
