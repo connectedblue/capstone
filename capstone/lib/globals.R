@@ -10,7 +10,8 @@ add.config(
         testing=TRUE,          
         training_dir="data/final/en_US",
         testing_dir="data/testing/en_US",
-        testing_pcent=0.1
+        testing_pcent=0.05,
+        profanity_file="data/profanity/engprofanity.csv"
         
 )
 
