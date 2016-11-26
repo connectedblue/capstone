@@ -1,6 +1,6 @@
 # First the corpus is cleaned
 
-cache("cleancorpus",  CODE={
+cache("cleancorpus",  depends="corpus", CODE={
         #start with raw corpus
         docs <- corpus
         
@@ -29,8 +29,37 @@ cache("dtm", depends="cleancorpus", CODE={
         DocumentTermMatrix(cleancorpus)
 })
 
-# word frequencies
+# single word frequencies
 
-freq <- colSums(as.matrix(dtm))
-ord <- order(freq)
+w_freq <- colSums(as.matrix(dtm))
+w_ord <- order(w_freq)
 
+BigramTokenizer <-
+        function(x)
+                unlist(lapply(ngrams(words(x), 2), paste, collapse = " "), use.names = FALSE)
+
+# Compute bi-grams from the clean corpus
+
+cache("bigram_dtm", depends="cleancorpus", CODE={
+        DocumentTermMatrix(cleancorpus, control = list(tokenize = BigramTokenizer))   
+}) 
+
+# bigram word frequencies
+
+bi_freq <- colSums(as.matrix(bigram_dtm))
+bi_ord <- order(bi_freq)
+
+TrigramTokenizer <-
+        function(x)
+                unlist(lapply(ngrams(words(x), 3), paste, collapse = " "), use.names = FALSE)
+
+# Compute tri-grams from the clean corpus
+
+cache("trigram_dtm", depends="cleancorpus", CODE={
+        DocumentTermMatrix(cleancorpus, control = list(tokenize = TrigramTokenizer))   
+}) 
+
+# Trigram word frequencies
+
+tri_freq <- colSums(as.matrix(trigram_dtm))
+tri_ord <- order(tri_freq)

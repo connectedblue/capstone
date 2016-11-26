@@ -6,8 +6,9 @@ munging: TRUE
 logging: FALSE
 logging_level: INFO
 load_libraries: TRUE
-libraries: tm, SnowballC, R.utils
+libraries: tm, SnowballC, R.utils, NLP
 as_factors: TRUE
 data_tables: FALSE
 attach_internal_libraries: FALSE
-cache_loaded_data:  TRUE
+cache_loaded_data: TRUE
+sticky_variables: corpus, cleancorpus, dtm, bigram_dtm, trigram_dtm, profanity
