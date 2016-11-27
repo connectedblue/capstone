@@ -4,4 +4,4 @@ profanity <- as.vector(read.csv(config$profanity_file, header=FALSE, stringsAsFa
 
 # replace question marks with periods to allow regular expression filter to work correctly
 
-profanity <- gsub("\\?", ".", profanity)
+profanity <- gsub("\\?", "", profanity)

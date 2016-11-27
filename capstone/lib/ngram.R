@@ -1,6 +1,6 @@
 # Calculate conditional probabilities
 
-# corpus_n     this is the frequency matrix of n word phrases
+# corpus_n     this is the frequency of n word phrases
 # word         this is the word we are guessing the probability for
 # previous     this is the phrase of length n-1 that precedes word
 
@@ -21,3 +21,4 @@ partition_vector <- function (v) {
         list <- v[]
         
 }
+

@@ -24,6 +24,8 @@ cache("cleancorpus",  depends="corpus", CODE={
 
 if(exists("docs")) rm(docs)
 
+
+
 # Create a document term matrix for the clean corpus
 cache("dtm", depends="cleancorpus", CODE={
         DocumentTermMatrix(cleancorpus)
@@ -38,10 +40,33 @@ BigramTokenizer <-
         function(x)
                 unlist(lapply(ngrams(words(x), 2), paste, collapse = " "), use.names = FALSE)
 
-# Compute bi-grams from the clean corpus
+# reduce the clean corpus further by removing words which occur less than 8 times
 
-cache("bigram_dtm", depends="cleancorpus", CODE={
-        DocumentTermMatrix(cleancorpus, control = list(tokenize = BigramTokenizer))   
+cache("cleancorpus2",  depends="cleancorpus", CODE={
+        #start with cleancorpus
+        docs <- cleancorpus
+        
+        # remove words with frequency less than 8
+        words_to_remove <- names(w_freq[w_freq<8])
+        # split into manageable chunks for removeWords
+        word_chunks<-split(words_to_remove, ceiling(seq_along(words_to_remove)/2000))
+        for (chunk in word_chunks) {
+                message("         Removing chunk of infrequent words")
+                docs <- tm_map(docs, removeWords, chunk)
+        }
+        
+        docs
+})
+
+if(exists("docs")) rm(docs, word_chunks)
+
+words_to_keep <- names(w_freq[w_freq>=8])
+
+
+# Compute bi-grams from the reduced clean corpus
+
+cache("bigram_dtm", depends="cleancorpus2", CODE={
+        DocumentTermMatrix(cleancorpus2, control = list(tokenize = BigramTokenizer))   
 }) 
 
 # bigram word frequencies
@@ -55,8 +80,8 @@ TrigramTokenizer <-
 
 # Compute tri-grams from the clean corpus
 
-cache("trigram_dtm", depends="cleancorpus", CODE={
-        DocumentTermMatrix(cleancorpus, control = list(tokenize = TrigramTokenizer))   
+cache("trigram_dtm", depends="cleancorpus2", CODE={
+        DocumentTermMatrix(cleancorpus2, control = list(tokenize = TrigramTokenizer))   
 }) 
 
 # Trigram word frequencies

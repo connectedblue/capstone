@@ -1,41 +1,196 @@
 ---
 title: 'Interim Report:  N-Gram prediction application'
 author: "Chris Shaw"
-date: "20 November 2016"
+date: "27 November 2016"
 output:
-  pdf_document: default
-  html_notebook: default
   html_document: default
+  html_notebook: default
+  pdf_document: default
+  tufte::tufte_html: default
 ---
+
+```{r setup, warning=FALSE, message=FALSE, echo=FALSE}
+# Load libraries needed for analysis
+
+library(ggplot2)
+library(knitr)
+library(htmlTable)
+library(ProjectTemplate)
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(cache = TRUE)
+knit_hooks$set(inline = function(x) {
+  prettyNum(x, big.mark=",")
+})
+```
+
 
 # Background and objectives
 
-The goal of this project is just to display that you've gotten used to working with the data and that you are on track to create your prediction algorithm. 
+The paper is an interim report on the project to predict N-Grams in different languages.  An exploratory analysis has been undertaken on the provided raw data and the goals for the final app and algorithm are outlined. 
 
-Please submit a report on R Pubs (http://rpubs.com/) that explains your exploratory analysis and your goals for the eventual app and algorithm. 
+There are some interesting features of the raw data which will influence the thinking in the production of the app.  The basic data is summarised using both tables and plots.
 
-This document should be concise and explain only the major features of the data you have identified and briefly summarize your plans for creating the prediction algorithm and Shiny app in a way that would be understandable to a non-data scientist manager. You should make use of tables and plots to illustrate important summaries of the data set. 
-
-The motivation for this project is to: 
-
-1. Demonstrate that you've downloaded the data and have successfully loaded it in.
-2. Create a basic report of summary statistics about the data sets.
-3. Report any interesting findings that you amassed so far.
-4. Get feedback on your plans for creating a prediction algorithm and Shiny app.
+Finally, it will be helpful to receive feedback on the proposed approach for the final project, including any features of the app that should be included.
 
 # Training Datasets
 
+We have been provided with large corpus's of data from four languages:  English, German, Swedish and Russian.  The table below shows the dimensions of the various English files from Twitter, blogs and news stories.
+
+
+```{r rawdata}
+
+raw_data <- data.frame(files=c("en_US.blogs.txt","en_US.news.txt", "en_US.twitter.txt", "Total"),
+                       size=c(210160014, 205811889, 167105338, 583077241),
+                       wc=c(37334114, 34365936, 30359852, 102059902 ),
+                       lc=c(899288,1010242, 2360148, 4269678 )
+                )
+ 
+col_headings <- c("File", "Size", "Number of words", "Number of lines")
+
+kable(raw_data, col.names=col_headings, align="lrrr", 
+      caption="Summary of the raw corpus data",
+      format.args=list(big.mark=','))
+```
+
+These are unwieldy and slow to work with, especially during the exploratory analysis, where we are trying to understand the characteristics.  For the purpose of the remainder of this paper, the raw data was randomly sampled using the binomial method to produce a corpus approximately 5% of the original.
+
+The raw data was further cleaned to remove profanity and stop words (very frequent words). Punctuation and numbers were also removed, and everything was converted to lower case for further analysis.  The decision to remove stop words resulted in some interesting patterns during analysis - this may be re-visited in the final application.
 
 # Exploratory Analysis
 
-## Dataset summary
+The first task to understand from the data is how frequent individual words (terms) appear.  The sample contains `r length(w_ord)` unique words - a surprisingly high number at first sight.  The graph below shows the distribution of those words.
 
-Summary of the three files:
-* Word counts
-* line counts
-* basic data tables
+```{r freqplot}
 
-## Features of the data
+data <- data.frame(x=1:length(w_freq[w_ord]), y=cumsum(w_freq[w_ord]))
+h_intercept <- 0.1*max(data$y)
+v_intercept <- 0.9*max(data$x)
+                   
+g<- ggplot(data=data, aes(x=x, y=y)) +
+        geom_point(colour="mediumblue", size=0.5) + 
+        
+        geom_hline(yintercept = h_intercept, linetype="dashed", colour="red", size=1) + 
+        geom_text(aes(x=20000, label="10% of corpus\n", y=h_intercept), colour="red") +
+        
+        geom_vline(xintercept = v_intercept, linetype="dashed", colour="red", size=1) +
+        geom_text(aes(x=v_intercept, label="90% of terms\n", y=0.7*max(data$y)), 
+                  angle=90, colour="red") +
+        
+        xlab("Unique Terms") +
+        ylab("Cumulative appearances in corpus") +
+        ggtitle("Frequency of individual terms") + 
+        theme(panel.grid.minor=element_blank(), 
+              panel.grid.major=element_blank(),
+              panel.background = element_rect(fill = "cornsilk"),
+              panel.border = element_rect(fill="transparent", colour="black"),
+              plot.title = element_text(hjust = 0.5)
+              )
+g
+```
 
-* basic plots, such as histograms to illustrate features of the data
+It can be seen that around 90% of the detected terms only account for around 10% of the corpus. To double check this and be sure we understand the data, it is worth looking at a random sample of terms which only appear one or twice: 
 
+
+```{r infreqsample}
+set.seed(1234)
+low_freq_words <- w_freq[w_freq<3]
+sample <- matrix(names(sample(low_freq_words,10)), nrow=5)
+kable(sample, col.names = c(" ", " "), align="lllll", padding=2)
+```
+
+It can be seen that some of these terms are phrases;  some may also have originally had punctuation such as a hyphen that was stripped during cleaning.  There are also mis-spellings as well as little used words.  These are all items which we will not want to include in our prediction model so they can be safely discarded.
+
+Based on this, for the purpose of the exploratory analysis, we decided to discard any terms from the sample which occurred less than 8 times.  This leaves `r length(words_to_keep)` terms to focus on which seems intuitively correct.
+
+Note that for the full application, we can re-run the same process a few more times, each time sampling a different 5% subset.  These different samples can be blended together to produce more comprehensive word and phrase coverage.
+
+
+## Dataset summary and features
+
+From this basic sample, we are able to construct bi-gram and tri-gram models - all sequences of consecutive two and three term phrases in the corpus.  
+
+The first area of interest was to investigate what the most frequent three word phrases are.  In the exploratory sample, these were as follows:
+
+```{r populartrigram}
+
+
+freq <- head(sort(tri_freq, decreasing = T), n=10)
+freq_table <- data.frame(phrase=names(freq), occurances=freq, row.names=NULL)
+
+
+kable(freq_table, col.names=c("Phrase", "Number of occurences"),
+      align="lr", 
+      caption="Most frequent three word phrases",
+      format.args=list(big.mark=',', na.encode=FALSE))
+
+```
+
+
+Some interesting features are already showing up which will influence how the final application will operate:
+
+* The most popular phrase "cant wait see" obviously has some stop words removed (e.g. to or and).  If we had left the stop words in, then this phrase wouldn't have necessarily surfaced (instead there would have been "cant wait to" and "cant wait and").  We need to think about this further.  The presence of stop words might make a more accurate model, but leaving them out provides more context for predicting the next major word.
+There is a similar observation for the phrase "looking forward seeing"
+
+* The phrase "cinco de mayo" is a surprising catch.  This is a national holiday celebration and may be an indication that the data was captured around May time.  We may wish to investigate that a bit further and perhaps extend the data acquisition to a full year to catch more similar time-dependent phrases.
+
+* There are a number of phrases missing punctuation, e.g. "feel like im".  Whilst the analysis is easier with punctuation removed, we would want to investigate where and when it is appropriate to add it back in before offering as a prediction to users.  Clearly Im is not an English word, whereas I'm is a valid term.
+
+## Probability models
+
+We can illustrate the prediction model approach by analysing one of the popular three word phrases in more detail.  We selected "happy new year" to look further at the properties.
+
+The approach to modelling is to calculate the maximum likelihood estimates of possible third words given the first two.  This can be expressed mathematically as:
+
+$$ \Pr(w_n \mid w_{n-1}) = \frac{C(w_nw_{n-1})}{C(w_{n-1})} $$
+where $w_n$ is the n-th word and $w_{n-1}$ is the preceding phrase.  The function $C(\dots)$ is simply a count of the phrases as they appear in the sample.
+
+We calculate these probabilities for all tri-grams that begin "happy new" and they are recorded in the following table.
+
+
+```{r trigram}
+
+freq <- prob_nextword(tri_freq, "year", "happy new")[[2]]
+freq <- sort(freq, decreasing = T)
+freq_table <- data.frame(phrase=names(freq), occurances=freq, row.names=NULL)
+freq_total <- sum(freq_table$occurances)
+freq_table <- cbind(freq_table, data.frame(prob=round(freq_table$occurances/freq_total, 4)))
+freq_table <- rbind(freq_table, data.frame(phrase="Total", occurances=sum(freq_table$occurances), 
+                                           prob=round(sum(freq_table$prob), 4)))
+
+kable(freq_table, col.names=c("", "Number of occurences", "Pr(Third Word|happy new)"),
+      align="lrr", 
+      caption="Likely phrases following 'happy new'",
+      format.args=list(big.mark=',', na.encode=FALSE))
+
+```
+
+The basic operation of the model is the user types the first two words, then the phrases above are presented in a drop down menu.  For simplicity, we may choose only the top three or four.  If there are several choices that are equally likely, we may randomly select one rather than the first alphabetically.
+
+We sampled a few phrases and they all had a similar pattern, i.e. the first two or three occurred multiple times, followed by a long tail of other possibilities that only occur once.  This may be improved when the 5% training sets are re-sampled with replacement many times to improve the learning.
+
+Some interesting observations to investigate further.  It may not be possible to account for all these in the prediction algorithm, but it's worth having a record of as many edge case examples as possible.
+
+* Clearly there are three related phrases:  "happy new year", "happy new years" and "happy new yr".  The latter is almost certainly due to a twitter corpus being included where short cuts are more prominent than say news sites.  It raises the question of whether we should exclude any words from the prediction model which are not in the dictionary.  This will entirely depend on the application of the predictor - if it is being used in the context of prediction in the Twitter app, then it is a good thing to include.  
+  On balance however, it's likely that non dictionary words will be removed in the final app.
+ 
+* It could be worth capturing a letter by letter input and changing the prediction options as more letters are typed.  For example, if the input was "happy new w" then there are two possibilities that could be presented.  this would improve dramatically with more training and re-sampling.
+
+
+## Conclusion and next steps
+
+The initial analysis has uncovered a basic methodology for tri-gram prediction, but also reveals a number of gotchas and hurdles to be overcome in the final application.
+
+The main priority is performance.  Even with the reduced dataset, some of the models took several minutes to build on an 8GB laptop.  They where also stored in sparse dataframes that consumed a lot of memory.  The first priority for the application is to investigate the most efficient model storage approach.
+
+The final application will be web based and feedback is welcomed on the how the user interface should be designed.
+
+
+These N-gram models will be the baseline for the prediction model in the final application, but some more research and analysis will be required to make the model size smaller, and run faster.
+
+## Appendix
+
+The full source code for this report can be found at:
+
+* https://github.com/connectedblue/capstone/tree/master/capstone
+
+The code is organised using the `ProjectTemplate` package.  The initial data acquisition and pre-processing is achieved by issuing a `load.project()` command in the directory.
