@@ -23,7 +23,7 @@ cache("cleancorpus",  depends="corpus", CODE={
 })
 
 if(exists("docs")) rm(docs)
-
+rm(profanity)
 
 
 # Create a document term matrix for the clean corpus
@@ -88,3 +88,11 @@ cache("trigram_dtm", depends="cleancorpus2", CODE={
 
 tri_freq <- colSums(as.matrix(trigram_dtm))
 tri_ord <- order(tri_freq)
+
+
+# Create a trigram tree
+
+cache("trigram_tree", depends="tri_freq", CODE={
+        NgramTree(tri_freq)
+        
+})
