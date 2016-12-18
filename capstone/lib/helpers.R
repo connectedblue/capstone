@@ -6,26 +6,17 @@
 
 sample_file <- function(full_dataset, select_pcent) {
         
-        file_lines <- countLines(full_dataset)
+        # read full_dataset
+        full_data <- readLines(full_dataset)
+        
+        file_lines <- length(full_data)
         
         lines_to_extract <- rbinom(n=file_lines, size=1, prob=select_pcent)
         extract_indexes <- which(lines_to_extract %in% 1)
-        skip_gaps <- c(extract_indexes[1], diff(extract_indexes))
+        
+        output<- full_data[extract_indexes]
         
         
-        output <- c()
-        
-        con <- file(full_dataset, "r")
-        
-        for(s in skip_gaps) {
-                output <- c(output, scan(con, what=character(), 
-                                         n=1, skip=s, sep = "\n", quiet = TRUE,
-                                         encoding = "UTF-8")
-                                         
-                )
-        }
-        
-        close(con)
         output
 } 
 

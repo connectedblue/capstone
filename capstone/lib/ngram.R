@@ -38,7 +38,12 @@ NgramTree <- function (freq) {
         n <- ncol(words)
         
         # figure out the n-1 phrases and the n-th words
-        n_1 <- apply(words[,-n], 1, paste,  collapse = " ")
+        if (n >2 ) {
+                n_1 <- apply(words[,-n], 1, paste,  collapse = " ")
+        }
+        else {
+                n_1 <- words[,1]
+        }
         nth <- words[,n]
         
         # create the tree with keyed fields 
@@ -70,5 +75,36 @@ N_1phrases <- function (freq) {
         
         
         n_1
+        
+}
+
+next_word <- function(phrase) {
+        
+        # remove words not in unigram tree
+        keep=c()
+        for (w in strsplit(phrase, " ")[[1]]) {
+                if (nrow(suppressWarnings(unigram_tree[n_1==w]))> 0 )
+                        keep <- c(keep, w)
+        }
+        
+        # get the last three words (or fewer)
+        if (length(keep) > 3)
+                keep <- keep[(length(keep)-2):length(keep)]
+        
+        print(keep)
+        
+        # look up in fourgram
+        result <- fourgram_tree[n_1==paste(keep, collapse = " ")]
+        setorder(result, -freq)
+        print(result)
+        
+        result <- trigram_tree[n_1==paste(keep[2:3], collapse = " ")]
+        setorder(result, -freq)
+        print(result)
+        
+        
+        result <- bigram_tree[n_1==keep[3]]
+        setorder(result, -freq)
+        print(result)
         
 }
