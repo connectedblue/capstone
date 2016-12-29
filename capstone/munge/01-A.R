@@ -22,8 +22,6 @@ cache("cleancorpus",  depends="corpus", CODE={
         docs
 })
 
-if(exists("docs")) rm(docs)
-rm(profanity)
 
 
 # Create a document term matrix for the clean corpus
@@ -55,7 +53,6 @@ cache("cleancorpus2",  depends="cleancorpus", CODE={
         docs
 })
 
-if(exists("docs")) rm(docs, word_chunks)
 
 words_to_keep <- names(w_freq[w_freq>=8])
 
@@ -155,3 +152,7 @@ cache("bigram_tree", depends="bi_freq", CODE={
 cache("unigram_tree", depends="uni_freq", CODE={
         NgramTree(uni_freq)
 })
+
+
+# Remove some un-needed data sets 
+rm(profanity)
