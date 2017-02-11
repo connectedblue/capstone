@@ -27,7 +27,7 @@ partition_vector <- function (v) {
 # output is a data.table object with the row names as the first (n-1) words and the columns as the n-th word
 # Values are the frequencies of (n-1) followed by n
 
-NgramTree <- function (freq) {
+NgramTree <- function (freq, keepwords) {
         # split the ngrams into a list 
         words<- strsplit(names(freq), " ")
         
@@ -36,6 +36,13 @@ NgramTree <- function (freq) {
         
         # determine what n is from the number of columns
         n <- ncol(words)
+        
+        # Filter out rows which contain words we are not keeping
+        for (idx in 1:n) {
+              words <- words %>% filter(.[[idx]] %in% keepwords)  
+        }
+        
+        
         
         # figure out the n-1 phrases and the n-th words
         if (n >2 ) {

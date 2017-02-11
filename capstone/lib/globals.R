@@ -9,8 +9,9 @@ add.config(
         # the testing_dir
         testing=TRUE,          
         training_dir="data/final/en_US",
-        testing_dir="data/testing/en_US",
-        testing_pcent=0.1,
+        testing_dir="data/testing0.01/en_US",
+        testing_pcent=0.01,
+        remove_word_freq=3,
         profanity_file="data/profanity/engprofanity.csv"
         
 )

@@ -2,10 +2,10 @@
 
 # create a digest look up table of nth words
 
-words <- unique(fourgram_tree$nth)
-digest <- sapply(as.vector(words), FUN=digest, raw=FALSE, algo="md5")
+#words <- unique(fourgram_tree$nth)
+#digest <- sapply(as.vector(words), FUN=digest, raw=FALSE, algo="md5")
 
-nth_words <- data.table(word=words, digest=digest,  key=c("word"))
+#nth_words <- data.table(word=words, digest=digest,  key=c("word"))
 
 
 #digest <- sapply(fourgram_tree$n_1, FUN=digest, raw=FALSE, algo="md5")
