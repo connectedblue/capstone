@@ -33,15 +33,19 @@ NgramTree <- function (freq, keepwords) {
         
         # make a data frame with each phrase in the rows and each column contains individual word
         words <- data.frame(matrix(unlist(words), nrow=length(words), byrow=TRUE),stringsAsFactors=FALSE)
+        words$freq <- freq
         
-        # determine what n is from the number of columns
-        n <- ncol(words)
+        # determine what n is from the number of columns (ignore freq at end)
+        n <- ncol(words) - 1
         
         # Filter out rows which contain words we are not keeping
         for (idx in 1:n) {
               words <- words %>% filter(.[[idx]] %in% keepwords)  
         }
         
+        # save the filtered freq and remove from words 
+        freq <- words$freq
+        words$freq<-NULL
         
         
         # figure out the n-1 phrases and the n-th words

@@ -80,6 +80,10 @@ cache("fourgram_dtm", depends="cleancorpus", CODE={
         DocumentTermMatrix(cleancorpus, control = list(tokenize = FourgramTokenizer))   
 }) 
 
+# Figure out which words to keep in the tree
+words_to_keep <- names(uni_freq[uni_freq>=config$remove_word_freq])
+
+
 # Fourgram word frequencies
 
 four_freq <- colSums(as.matrix(fourgram_dtm))
@@ -89,7 +93,7 @@ four_ord <- order(four_freq)
 # Create a fourgram tree
 
 cache("fourgram_tree", depends="four_freq", CODE={
-        NgramTree(four_freq)
+        NgramTree(four_freq, words_to_keep)
         
 })
 
@@ -99,8 +103,6 @@ tri_freq <- colSums(as.matrix(trigram_dtm))
 tri_ord <- order(tri_freq)
 
 
-# Figure out which words to keep in the tree
-words_to_keep <- names(uni_freq[uni_freq>=config$remove_word_freq])
 
 
 # Create a trigram tree
