@@ -32,14 +32,14 @@ create_word_index <- function(keepwords) {
 # valid word is one which has an index numb
 
 phrase_to_index <- function(phrase, word_index) {
+        # input is a vector of phrases
         phrase <- strsplit(phrase, " ")
+        
         # apply indices
         idx<-lapply(phrase, function(x) word_index$num[match(x, word_index$word)])
         
-        # remove NAs
-        idx <- lapply
-        
-        return(idx)
+        # Convert to a dataframe and return
+        return(data.frame(matrix(unlist(idx), nrow=length(idx), byrow=TRUE)))
 }
 
 # Turn a phrase into exactly 4 index values 
@@ -47,9 +47,18 @@ phrase_to_index <- function(phrase, word_index) {
 # than four it is truncated to exactly 4
 
 four_phrase_index <- function(phrase, word_index) {
-        idx <- phrase_to_index(phrase, word_index, 4)
-        n<-length(idx)
-        if (n<4) idx <- c(rep(0, 4-n), idx)
+        idx <- phrase_to_index(phrase, word_index)
+        
+        n<-ncol(idx)
+        # remove first few not needed columns
+        if (n>4) idx <- idx[,-1:(n-4)]
+        
+        # add some zeroes to the beginning if there are less than 4 columns
+        if (n<4) {
+                zeroes <- data.frame(matrix(rep(0, nrow(idx)*(4-n)), nrow=nrow(idx)))
+                idx <- cbind(zeroes, idx)
+        }      
+        names(idx) <- c("X1", "X2", "X3", "X4")
         return(idx)
         
 }
@@ -70,27 +79,19 @@ four_phrase_index <- function(phrase, word_index) {
 
 eNgramTree <- function (ngram_tree, word_index) {
         
-        n<-nrow(ngram_tree)
-        # create a skeleton tree 
-        tree <- data.frame(n_3=rep(0,n),
-                           n_2=rep(0,n),
-                           n_1=rep(0,n),
-                           nth=rep(0,n),
-                           type=rep(0,n),
-                           freq=ngram_tree$freq,
-                           count_n_1=ngram_tree$count_n_1
-
-                                           )
-        # fill in each row
-        phrase <- paste0(ngram_tree$n_1, " ", ngram_tree$nth)
-        idx <- four_phrase_index(phrase, word_index)
-        tree$n_3<-idx[1]
-        tree$n_2<-idx[2]
-        tree$n_1<-idx[3]
-        tree$nth<-idx[4]
-
+        # paste together the n_1 and nth columns
+        phrases <- paste0(ngram_tree$n_1, " ", ngram_tree$nth)
         
-        tree
+        # Get a four column tree when the nth word is in column 4
+        tree <- four_phrase_index(phrases, word_index)
+        
+        # return a dataframe and append the freq and count_n_1 from
+        # the original tree
+        
+        return (data.frame(n_3=tree$X1, n_2=tree$X2, n_1=tree$X3, nth=tree$X4,
+                           freq=ngram_tree$freq, 
+                           count_n_1=ngram_tree$count_n_1))
+        
 }
 
 

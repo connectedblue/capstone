@@ -1,17 +1,28 @@
-# Optimise the data sets
+# Create optimised versions of the Trees
 
-# create a digest look up table of nth words
+# First, create the wordlist that we are going to use.
 
-#words <- unique(fourgram_tree$nth)
-#digest <- sapply(as.vector(words), FUN=digest, raw=FALSE, algo="md5")
+word_list <- create_word_index(words_to_keep)
 
-#nth_words <- data.table(word=words, digest=digest,  key=c("word"))
+# create a combined optimised tree for each of the Ngrams >1
 
-
-#digest <- sapply(fourgram_tree$n_1, FUN=digest, raw=FALSE, algo="md5")
-
-#new_fourgram <- data.table(digest=digest, nth=fourgram_tree$nth,
-#                           freq=fourgram_tree$freq,count_n_1=fourgram_tree$count_n_1, 
-#                           key=c("digest"))
-
-
+cache("tree",  depends=c("fourgram_tree", 
+                         "trigram_tree",
+                         "bigram_tree",
+                         "unigram_tree",
+                         "word_list"), CODE={
+        
+        tree <- rbind(eNgramTree(fourgram_tree, word_list),
+                      eNgramTree(trigram_tree, word_list),
+                      eNgramTree(bigram_tree, word_list))
+        
+        # The unigram tree needs the 3rd column setting to zero before binding
+        e_unigram_tree <- eNgramTree(unigram_tree, word_list)
+        e_unigram_tree$n_1 <- rep(0, nrow(e_unigram_tree))
+        
+        # Add unigram to the tree and turn into a datatable
+        
+        tree <- rbind(tree, e_unigram_tree)
+        setDT(tree, key=c("n_3", "n_2", "n_1", "nth"))
+        tree
+})
