@@ -133,6 +133,23 @@ tree_match <- function (phrase, tree) {
 phrase_tree <- function (phrase, tree, word_list) {
         phrase <- three_word_phrase(phrase, word_list)
         
+        # start with first tree
+        result <- tree_match(phrase, tree)
+        
+        if (phrase[1]==0 & phrase[2]==0) return(result)
+        
+        if (phrase[1]==0) {
+                phrase[2] <- 0
+                result <- rbind(result, tree_match(phrase, tree))
+                return(result)
+        }
+        else {
+                phrase[1] <- 0
+                result <- rbind(result, tree_match(phrase, tree))
+                phrase[2] <- 0
+                result <- rbind(result, tree_match(phrase, tree))
+                return(result)
+        }
 }
 
 

@@ -11,7 +11,7 @@ cache("cleancorpus",  depends="corpus", CODE={
         docs <- tm_map(docs, removePunctuation)  
         docs <- tm_map(docs, removeNumbers) 
         docs <- tm_map(docs, content_transformer(tolower)) 
-        docs <- tm_map(docs, removeWords, stopwords(config$language))
+        #docs <- tm_map(docs, removeWords, stopwords(config$language))
 
         
         # remove profanity from the corpus
@@ -81,7 +81,8 @@ cache("fourgram_dtm", depends="cleancorpus", CODE={
 }) 
 
 # Figure out which words to keep in the tree
-words_to_keep <- names(uni_freq[uni_freq>=config$remove_word_freq])
+most_freq<-quantile(uni_freq, probs = seq(0, 1, by= 0.1))[config$remove_word_freq]
+words_to_keep <- names(uni_freq[uni_freq>=most_freq])
 
 
 # Fourgram word frequencies
