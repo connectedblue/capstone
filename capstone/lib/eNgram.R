@@ -86,17 +86,54 @@ eNgramTree <- function (ngram_tree, word_index) {
         tree <- four_phrase_index(phrases, word_index)
         
         # return a dataframe and append the freq and count_n_1 from
-        # the original tree
+        # the original tree.  Type represents which n-gram the tree is.
         
-        return (data.frame(n_3=tree$X1, n_2=tree$X2, n_1=tree$X3, nth=tree$X4,
-                           freq=ngram_tree$freq, 
-                           count_n_1=ngram_tree$count_n_1))
+        return (data.frame(n_3=as.integer(tree$X1),
+                           n_2=as.integer(tree$X2),
+                           n_1=as.integer(tree$X3),
+                           nth=as.integer(tree$X4),
+                           freq=as.integer(ngram_tree$freq), 
+                           count_n_1=as.integer(ngram_tree$count_n_1)
+                           ))
         
 }
 
+# Turn a single input phrase into at most three words which are in the word_list
+# Index numbers are returned - words at the end of the phrase are the ones that count
+# This can then be used to predict the next word
+
+three_word_phrase <- function (phrase, word_list) {
+        phrase <- strsplit(phrase, " ")[[1]]
+        
+        # remove any words not in  the word_list
+        phrase <- phrase[phrase %in% word_list$word]
+        
+        # Convert to numbers
+        phrase <- word_list[phrase]$num 
+        
+        n<-length(phrase)
+        
+        if (n>3) phrase <- phrase[(n-2):n]
+        if (n<3) phrase <- c(rep(0, 3-n), phrase)
+        
+        phrase
+}
+
+# Function to find all matches in the tree of a phrase
+# tree is an eNgramTree
+
+tree_match <- function (phrase, tree) {
+        return (tree[n_3==phrase[1] & n_2==phrase[2] & n_1==phrase[3]])
+}
 
 
+# Function to take an arbitary phrase and find all occurences in a tree
+# of 4-,3- and 2-grams
 
+phrase_tree <- function (phrase, tree, word_list) {
+        phrase <- three_word_phrase(phrase, word_list)
+        
+}
 
 
 
