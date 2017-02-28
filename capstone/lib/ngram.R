@@ -23,7 +23,7 @@ partition_vector <- function (v) {
 }
 
 # create an n-gram tree
-# input is a vector of ngrame frequencies
+# input is a vector of ngram frequencies and a vector of words to keep
 # output is a data.table object with the row names as the first (n-1) words and the columns as the n-th word
 # Values are the frequencies of (n-1) followed by n
 
@@ -65,6 +65,9 @@ NgramTree <- function (freq, keepwords) {
         
         tree
 }
+
+
+
 
 # create an n-1 phrase list from an ngram frequency
 # input is a vector of ngram frequencies
