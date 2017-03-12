@@ -1,5 +1,5 @@
 data/final
-data/testing
+data/testing*
 *.zip
 cache
 *csv
