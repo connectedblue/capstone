@@ -12,7 +12,8 @@ add.config(
         testing_dir="data/testing0.1/en_US",
         testing_pcent=0.1,
         remove_word_freq="90%",
-        profanity_file="data/profanity/engprofanity.csv"
+        profanity_file="data/profanity/engprofanity.csv",
+        tree_filter=0.03
         
 )
 

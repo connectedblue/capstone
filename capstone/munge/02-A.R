@@ -17,12 +17,13 @@ cache("tree",  depends=c("fourgram_tree",
                       eNgramTree(bigram_tree, word_list))
         
         # The unigram tree needs the 3rd column setting to zero before binding
-        e_unigram_tree <- eNgramTree(unigram_tree, word_list)
-        e_unigram_tree$n_1 <- as.integer(rep(0, nrow(e_unigram_tree)))
+        #e_unigram_tree <- eNgramTree(unigram_tree, word_list)
+        #e_unigram_tree$n_1 <- as.integer(rep(0, nrow(e_unigram_tree)))
         
         # Add unigram to the tree and turn into a datatable
         
-        tree <- rbind(tree, e_unigram_tree)
+        #tree <- rbind(tree, e_unigram_tree)
+        
         setDT(tree, key=c("n_3", "n_2", "n_1", "nth"))
         tree
 })

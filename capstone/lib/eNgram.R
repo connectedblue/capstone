@@ -152,5 +152,13 @@ phrase_tree <- function (phrase, tree, word_list) {
         }
 }
 
-
+predict_next_word <- function(phrase) {
+        # get table of next words
+        words <- phrase_tree(phrase, tree, word_list)
+        words$cols <- ifelse(words$n_3>0, 3, ifelse(words$n_2>0,2,1))
+        
+        # re-arrange in decreasing order of likelihood
+        words <- words %>% arrange(desc(cols), desc(freq/count_n_1))
+        return(word_list[words$nth]$word)
+}
 
