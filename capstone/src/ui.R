@@ -1,11 +1,6 @@
 library(shiny)
 
-
-
-
-# UI for the map display
-
-shinyUI(pageWithSidebar(
+shinyUI(fluidPage(
         headerPanel("Next Word Predictor"),
         
         mainPanel(
@@ -17,10 +12,10 @@ shinyUI(pageWithSidebar(
                                            value = "", 
                                            width = "500px", 
                                            placeholder = "Type the beginning of a phrase"),
-                                 actionButton("submit", 
-                                           label = "Predict next word", 
-                                           width = "100px"),
-                                 textOutput("predicted_word")
+                                 
+                                 htmlOutput("predicted_word")
+                               
+                                 
                                  ),
                         tabPanel("About", includeHTML("instructions.html"))
                         

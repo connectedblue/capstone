@@ -136,7 +136,7 @@ phrase_tree <- function (phrase, tree, word_list) {
         # start with first tree
         result <- tree_match(phrase, tree)
         
-        if (phrase[1]==0 & phrase[2]==0) return(result)
+        if ((phrase[1]==0 & phrase[2]==0)|nrow(result)==1) return(result)
         
         if (phrase[1]==0) {
                 phrase[2] <- 0
@@ -146,6 +146,7 @@ phrase_tree <- function (phrase, tree, word_list) {
         else {
                 phrase[1] <- 0
                 result <- rbind(result, tree_match(phrase, tree))
+                if (nrow(result)==1) return(result)
                 phrase[2] <- 0
                 result <- rbind(result, tree_match(phrase, tree))
                 return(result)
@@ -154,7 +155,7 @@ phrase_tree <- function (phrase, tree, word_list) {
 
 predict_next_word <- function(phrase) {
         # get table of next words
-        words <- phrase_tree(phrase, tree, word_list)
+        words <- phrase_tree(phrase, tree1, word_list)
         words$cols <- ifelse(words$n_3>0, 3, ifelse(words$n_2>0,2,1))
         
         # re-arrange in decreasing order of likelihood

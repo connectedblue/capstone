@@ -27,3 +27,15 @@ cache("tree",  depends=c("fourgram_tree",
         setDT(tree, key=c("n_3", "n_2", "n_1", "nth"))
         tree
 })
+
+# create a tree1 optimised from tree to do the lookups
+
+cache("tree1", depends = "tree", {
+        
+        tree1 <- tree %>% 
+                 group_by(n_3, n_2, n_1) %>%
+                 arrange(n_3, n_2, n_1, desc(freq)) %>%
+                 filter(row_number()==1)
+        tree1 <- data.table(tree1, key=c("n_3", "n_2", "n_1", "nth"))
+        tree1
+})

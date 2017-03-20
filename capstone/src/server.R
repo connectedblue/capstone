@@ -10,8 +10,11 @@ shinyServer(
                 # set output$predicted_word based on input$phrase
                 
                 observeEvent(input$phrase, {
-                        output$predicted_word <- renderText(paste0(input$phrase, " .... ",
-                                                "<prediction here>"))
+                        
+                        output$predicted_word <- renderUI(HTML(paste0(input$phrase, 
+                                                                   " .... ",
+                                                                   predict_next_word(input$phrase)[1]
+                                                                   )))
                 })
                 
                  
