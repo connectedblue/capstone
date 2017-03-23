@@ -1,0 +1,10 @@
+name: shinyapp
+title: shinyapp
+account: connectedblue
+server: shinyapps.io
+appId: 165669
+bundleId: 758665
+url: https://connectedblue.shinyapps.io/shinyapp/
+when: 1490220158.15624
+asMultiple: FALSE
+asStatic: FALSE

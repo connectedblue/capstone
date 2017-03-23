@@ -159,7 +159,7 @@ predict_next_word <- function(phrase) {
         words$cols <- ifelse(words$n_3>0, 3, ifelse(words$n_2>0,2,1))
         
         # re-arrange in decreasing order of likelihood
-        words <- words %>% arrange(desc(cols), desc(freq/count_n_1))
+        words <- words %>% arrange(desc(cols))
         return(word_list[words$nth]$word)
 }
 
